@@ -39,3 +39,7 @@ def delete_book(request, book_id):
         return redirect('list_books')
 
     return render(request, 'bookstore/delete_book.html', {'book': book})
+
+def list_books(request):
+    books = Book.objects.all()
+    return render(request, 'bookstore/list_books.html', {'books': books})
