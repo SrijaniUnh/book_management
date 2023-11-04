@@ -30,3 +30,12 @@ def update_book(request, book_id):
         form = UpdateBookForm(instance=book)
 
     return render(request, 'bookstore/update_book.html', {'form': form, 'book': book})
+
+def delete_book(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
+
+    if request.method == 'POST':
+        book.delete()
+        return redirect('list_books')
+
+    return render(request, 'bookstore/delete_book.html', {'book': book})
