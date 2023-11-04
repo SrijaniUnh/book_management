@@ -17,3 +17,16 @@ def add_book(request):
         form = AddBookForm()
 
     return render(request, 'bookstore/add_book.html', {'form': form})
+
+def update_book(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
+
+    if request.method == 'POST':
+        form = UpdateBookForm(request.POST, instance=book)
+        if form.is_valid():
+            form.save()
+            return redirect('list_books')
+    else:
+        form = UpdateBookForm(instance=book)
+
+    return render(request, 'bookstore/update_book.html', {'form': form, 'book': book})
