@@ -14,7 +14,7 @@ def fetch_book_details(title, author):
         return {
             'summary': book_info.get('description', ''),
             'cover_url': book_info['imageLinks']['thumbnail'] if 'imageLinks' in book_info else ''
-            # Add other relevant details
+            
         }
     else:
         return {}
