@@ -1,8 +1,7 @@
 import requests
 
 def fetch_book_details(title, author):
-    # Replace with your Google Books API key
-    api_key = 'your_api_key'
+    api_key = ''
     base_url = 'https://www.googleapis.com/books/v1/volumes'
     params = {'q': f'intitle:{title}+inauthor:{author}', 'key': api_key}
 
