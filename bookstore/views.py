@@ -1,45 +1,54 @@
-from django.shortcuts import render, get_object_or_404, redirect
+# homepage/views.py
+import requests
+from django.shortcuts import render
+from django.views import View
+from django.shortcuts import get_object_or_404
 from .models import Book
-from .forms import AddBookForm, UpdateBookForm
-from .external_api import fetch_book_details
 
-def add_book(request):
-    if request.method == 'POST':
-        form = AddBookForm(request.POST)
-        if form.is_valid():
-            book = form.save(commit=False)
-            additional_details = fetch_book_details(book.title, book.author)
-            book.summary = additional_details.get('summary', '')
-            book.cover_url = additional_details.get('cover_url', '')
-            book.save()
-            return redirect('list_books')
-    else:
-        form = AddBookForm()
+class HomeView(View):
+    def get(self, request, *args, **kwargs):
+        return render(request, 'pages/home.html')
 
-    return render(request, 'bookstore/add_book.html', {'form': form})
+class AboutView(View):
+    def get(self, request, *args, **kwargs):
+        return render(request, 'pages/about.html')
 
-def update_book(request, book_id):
-    book = get_object_or_404(Book, id=book_id)
+class BookSearchView(View):
+    def get(self, request, *args, **kwargs):
+        # Get the search query from the URL parameters
+        query = request.GET.get('q')
 
-    if request.method == 'POST':
-        form = UpdateBookForm(request.POST, instance=book)
-        if form.is_valid():
-            form.save()
-            return redirect('list_books')
-    else:
-        form = UpdateBookForm(instance=book)
+        if not query:
+            # Render the book_search.html template without making an API request
+            return render(request, 'bookstore/book_search.html')
 
-    return render(request, 'bookstore/update_book.html', {'form': form, 'book': book})
+        # Define the Open Library API URL
+        api_url = f'https://openlibrary.org/search.json?q={query}'
 
-def delete_book(request, book_id):
-    book = get_object_or_404(Book, id=book_id)
+        try:
+            # Make a request to the Open Library API
+            response = requests.get(api_url)
+            response.raise_for_status()  # Raise an exception for HTTP errors
+            data = response.json()
+        except requests.RequestException as e:
+            # Handle API request errors
+            return render(request, 'bookstore/book_search.html', {'error': f'Error making API request: {str(e)}'})
 
-    if request.method == 'POST':
-        book.delete()
-        return redirect('list_books')
+        # Extract the list of books from the API response
+        books = data.get('docs', [])
 
-    return render(request, 'bookstore/delete_book.html', {'book': book})
+        # Extract relevant information for each book
+        book_list = []
+        for book in books:
+            book_info = {
+                'title': book.get('title', ''),
+                'author': ', '.join(book.get('author_name', [])),
+                'publish_date': book.get('publish_date', ''),
+                'subject': ', '.join(book.get('subject', [])),
+                'cover_url': f'https://covers.openlibrary.org/b/id/{book.get("cover_i", "")}-L.jpg',  # Cover URL
+                'isbn': ', '.join(book.get('isbn', [])),
+            }
+            book_list.append(book_info)
 
-def list_books(request):
-    books = Book.objects.all()
-    return render(request, 'bookstore/list_books.html', {'books': books})
+        # Return the list of books as context to be used in the template
+        return render(request, 'bookstore/book_search.html', {'books': book_list})

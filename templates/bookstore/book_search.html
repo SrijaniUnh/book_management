@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Search</title>
+</head>
+<body>
+
+    <h1>Book Search</h1>
+
+    <form id="bookSearchForm" method="GET" action="{% url 'book_search' %}">
+        <label for="searchQuery">Search for a book:</label>
+        <input type="text" id="searchQuery" name="q" required>
+        <button type="submit">Search</button>
+    </form>
+
+    <div id="searchResults">
+        <h1>Book Search Results</h1>
+
+    {% if error %}
+        <p>Error: {{ error }}</p>
+    {% else %}
+        {% if books %}
+            <ul>
+                {% for book in books %}
+                    <li>
+                        <h2>{{ book.title }}</h2>
+                        <p>Author(s): {{ book.author }}</p>
+                        <p>Publish Date: {{ book.publish_date }}</p>
+                        <p>Subjects: {{ book.subject }}</p>
+                        <img src="{{ book.cover_url }}" alt="Book Cover">
+                        <p>ISBN: {{ book.isbn }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No books found.</p>
+        {% endif %}
+    {% endif %}
+
+    <script>
+        document.getElementById('bookSearchForm').addEventListener('submit', function (event) {
+            // JavaScript code for handling form submission
+            // ...
+        });
+    </script>
+
+</body>
+</html>
