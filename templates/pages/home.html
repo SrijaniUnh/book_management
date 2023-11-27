@@ -1,1 +1,35 @@
-{% extends "base.html" %}
+<!-- pages/home.html -->
+
+{% extends 'base.html' %}
+
+{% block title %}Welcome to the Bookstore{% endblock title %}
+
+{% block content %}
+
+  <div class="jumbotron">
+    <h1 class="display-4">Discover the World of Books</h1>
+    <p class="lead">Explore a vast collection of books covering various genres and topics.</p>
+    <hr class="my-4">
+    <p>Whether you're into fiction, non-fiction, or something in between, our bookstore has something for everyone.</p>
+    <a class="btn btn-primary btn-lg" href="{% url 'book_search' %}" role="button">Search Books</a>
+  </div>
+
+  <div class="row">
+    <div class="col-md-4">
+      <h2>My Books</h2>
+      <p>Manage your personal book collection, add new books, and keep track of what you've read.</p>
+      <a class="btn btn-secondary" href="{% url 'book_list' %}" role="button">View My Books</a>
+    </div>
+    <div class="col-md-4">
+      <h2>Search</h2>
+      <p>Looking for a specific book? Use our search feature to find books based on titles, authors, or subjects.</p>
+      <a class="btn btn-secondary" href="{% url 'book_search' %}" role="button">Start Searching</a>
+    </div>
+    <div class="col-md-4">
+      <h2>Add a Book</h2>
+      <p>Contribute to our growing collection by adding a new book. Share your favorite reads with the community.</p>
+      <a class="btn btn-secondary" href="{% url 'create_book' %}" role="button">Add a New Book</a>
+    </div>
+  </div>
+
+{% endblock content %}
