@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>{% block title %}Book Store{% endblock title %}</title>
+    <title>{% block title %}Book Store{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -38,16 +38,13 @@
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav mr-auto">
-              <li class="nav-item active">
+              <li class="nav-item {% if request.path == '/' %}active{% endif %}">
                   <a class="nav-link" href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a>
               </li>
-              <li class="nav-item">
-                  <a class="nav-link" href="{% url 'about' %}">About</a>
+              <li class="nav-item {% if request.path == '/book_list/' %}active{% endif %}">
+                  <a class="nav-link" href="{% url 'book_list' %}">My Books</a>
               </li>
-              <li class="nav-item">
-                  <a class="nav-link" href="{% url 'book_search' %}">Books</a>
-              </li>
-              <li class="nav-item">
+              <li class="nav-item {% if request.path == '/book_search/' %}active{% endif %}">
                   <a class="nav-link" href="{% url 'book_search' %}">Search</a>
               </li>
           </ul>
@@ -65,7 +62,7 @@
       {% endif %}
 
       {% block content %}
-        <p>The Ultimate Cheese Index! This text is inherited on other pages!</p>
+        
       {% endblock content %}
 
     </div> <!-- /container -->
