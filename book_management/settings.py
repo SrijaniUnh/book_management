@@ -33,12 +33,13 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     "django.contrib.admin",
+    "bookstore",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "bookstore",
+    
     
     
 ]
@@ -51,6 +52,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    
     
     
 ]
@@ -86,7 +88,8 @@ DATABASES = {
     }
 }
 
-
+STATIC_URL = '/static/'
+STATIC_ROOT  = os.path.join(BASE_DIR, 'static')
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
