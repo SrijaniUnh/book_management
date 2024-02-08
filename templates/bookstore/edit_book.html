@@ -3,34 +3,43 @@
 {% block title %}Edit Book{% endblock %}
 
 {% block content %}
-  <div class="container">
+  <div class="form-group">
     <h2>Edit Book: {{ book.title }}</h2>
-    <form id="editBookForm" method="post" action="{% url 'edit_book' pk=book.title %}">
+    <form method="post" id="editBookForm">
       {% csrf_token %}
       {{ form.as_p }}
-      <button type="button" onclick="confirmEdit()">Save Changes</button>
+      <button type="button" onclick="confirmUpdate()">Save Changes</button>
     </form>
   </div>
 
+  <!-- Popup Modal -->
+  <div class="modal" tabindex="-1" role="dialog" id="confirmationModal">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirm Update</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to save changes?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="submitForm()">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
-    function confirmEdit() {
-      // Show a confirmation dialog
-      var confirmed = confirm("Are you sure you want to save changes?");
+    function confirmUpdate() {
+      $('#confirmationModal').modal('show');
+    }
 
-      // If user confirms, make an Ajax request to submit the form
-      if (confirmed) {
-        var form = document.getElementById('editBookForm');
-        var formData = new FormData(form);
-
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', form.action, true);
-        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        xhr.onload = function () {
-          // Handle the response, e.g., display a success message
-          alert('Changes saved successfully!');
-        };
-        xhr.send(formData);
-      }
+    function submitForm() {
+      $('#editBookForm').submit();
     }
   </script>
 {% endblock %}

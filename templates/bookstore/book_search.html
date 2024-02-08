@@ -6,7 +6,7 @@
     <div class="container">
         <h1 class="mt-4">Book Search</h1>
 
-        <form id="bookSearchForm" class="mt-4" method="GET" action="{% url 'book_search' %}">
+        <form id="bookSearchForm" class="mt-4" method="GET" action="{% url 'book_search' %}" onsubmit="submitForm(event)">
             <div class="form-group">
                 <label for="searchQuery">Search for a book:</label>
                 <input type="text" id="searchQuery" name="q" class="form-control" required>
@@ -71,8 +71,31 @@
         </div>
     </div>
 
+    <script src="/static/admin/js/vendor/jquery/jquery.min.js"></script>
     <script>
-        // JavaScript code for handling form submission or other interactions
-        // ...
-    </script>
+        function submitForm(event) {
+           event.preventDefault();
+           var query = $('#searchQuery').val();
+     
+           // Perform client-side validation
+           if (!/^[a-zA-Z0-9\s]+$/.test(query)) {
+              alert('Invalid input. Please enter only letters, numbers, or spaces.');
+              return;
+           }
+           $('#searchResults').html('');
+           // AJAX request to submit the form data
+           $.ajax({
+              type: 'GET',
+              url: '{% url "book_search" %}',
+              data: { 'q': query },
+              success: function (data) {
+                 // Update the search results div with the returned data
+                 $('#searchResults').html(data);
+              },
+              error: function (xhr, status, error) {
+                 alert('Error: ' + error);
+              }
+           });
+        }
+     </script>
 {% endblock %}

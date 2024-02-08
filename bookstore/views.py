@@ -51,12 +51,11 @@ def delete_book(request, pk):
     book.delete()
     return redirect('book_list')
 
-class BookSearchView(View):
 
+class BookSearchView(View):
     my_books = []
 
     def get(self, request, *args, **kwargs):
-        
         query = request.GET.get('q')
 
         if not query:
@@ -69,6 +68,8 @@ class BookSearchView(View):
             response.raise_for_status()  # Raise an exception for HTTP errors
             data = response.json()
         except requests.RequestException as e:
+            if request.headers.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+                return JsonResponse({'error': f'Error making API request: {str(e)}'}, status=400)
             return render(request, 'bookstore/book_search.html', {'error': f'Error making API request: {str(e)}'})
 
         books = data.get('docs', [])
@@ -76,29 +77,26 @@ class BookSearchView(View):
         book_list = []
 
         def get_single_value(values):
-            """
-            Returns the first non-empty value from a list, or None if none are found.
-            """
             for value in values:
                 if value:
                     return value
-                return None
-            
+            return None
+
         for book in books:
             book_info = {
-        'title': book.get('title', ''),
-        'author': ', '.join(book.get('author_name', [])),
-        'publish_date': get_single_value(book.get('publish_date', [])),
-        'subject': get_single_value(book.get('subject', [])),
-        'cover_url': f'https://covers.openlibrary.org/b/id/{book.get("cover_i", "")}-L.jpg', 
-        'isbn': get_single_value(book.get('isbn', [])),
-        }
+                'title': book.get('title', ''),
+                'author': ', '.join(book.get('author_name', [])),
+                'publish_date': get_single_value(book.get('publish_date', [])),
+                'subject': get_single_value(book.get('subject', [])),
+                'cover_url': f'https://covers.openlibrary.org/b/id/{book.get("cover_i", "")}-L.jpg',
+                'isbn': get_single_value(book.get('isbn', [])),
+            }
             book_list.append(book_info)
-        
-            
-        return render(request, 'bookstore/book_search.html', {'books': book_list})
 
-    
+        if request.headers.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest':
+            return render(request, 'bookstore/book_search_ajax.html', {'books': book_list})
+        else:
+            return render(request, 'bookstore/book_search.html', {'books': book_list})
 
     
     def post(self, request, *args, **kwargs):
@@ -140,55 +138,40 @@ class EditBookView(View):
         form = BookForm(initial=book)
         return render(request, 'bookstore/edit_book.html', {'form': form, 'book': book})
     
+
     def post(self, request, pk, *args, **kwargs):
-        book = get_object_or_404(Book, title=pk)
-        form = BookForm(request.POST, instance=book)
+        book = next((book for book in BookSearchView.my_books if book['title'] == pk), None)
+
+        if not book:
+            return HttpResponseNotFound("Book not found in the list")
+
+        form = BookForm(request.POST)
 
         if form.is_valid():
-            form.save()
-
-            if request.is_ajax():
-                return JsonResponse({'success': True})
-
-            return redirect('book_list')  # Redirect to the book list or any other desired page
-
-        if request.is_ajax():
-            return JsonResponse({'success': False, 'errors': form.errors})
+            # Update the book details in the list
+            book.update(form.cleaned_data)
+            return redirect('my_books')  # Redirect to the book list or any other desired page
 
         return render(request, 'bookstore/edit_book.html', {'form': form, 'book': book})
 
-    # def post(self, request, pk, *args, **kwargs):
-    #     book = next((book for book in BookSearchView.my_books if book['title'] == pk), None)
-
-    #     if not book:
-    #         return HttpResponseNotFound("Book not found in the list")
-
-    #     form = BookForm(request.POST)
-
-    #     if form.is_valid():
-    #         # Update the book details in the list
-    #         book.update(form.cleaned_data)
-    #         return redirect('my_books')  # Redirect to the book list or any other desired page
-
-    #     return render(request, 'bookstore/edit_book.html', {'form': form, 'book': book})
-
     
 class DeleteBookView(View):
-    @staticmethod
-    def delete_book(title, book_list):
-        # Find and remove the book from the list based on the title
-        for book in book_list:
-            if book['title'] == title:
-                book_list.remove(book)
-                break
+    def get(self, request, pk, *args, **kwargs):
+        book = next((book for book in BookSearchView.my_books if book['title'] == pk), None)
 
-    def post(self, request, *args, **kwargs):
-        title = request.POST.get('title')
+        if not book:
+            return HttpResponseNotFound("Book not found in the list")
 
-        if title:
-            # Delete the book from the list
-            DeleteBookView.delete_book(title, BookSearchView.my_books)
+        return render(request, 'bookstore/delete_book.html', {'book': book})
 
-        # Redirect back to the book search page
-        return redirect('book_search')
+    def post(self, request, pk, *args, **kwargs):
+        book = next((book for book in BookSearchView.my_books if book['title'] == pk), None)
+
+        if not book:
+            return HttpResponseNotFound("Book not found in the list")
+
+        # Delete the book from the list
+        BookSearchView.my_books.remove(book)
+        
+        return redirect('my_books')  # Redirect to the book list or any other desired page
     

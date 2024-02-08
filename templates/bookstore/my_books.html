@@ -29,7 +29,7 @@
                         <td>{{ book.isbn }}</td>
                         <td>
                             <a href="{% url 'edit_book' pk=book.title %}">Edit</a>
-                            <a href="#" onclick="confirmDelete('{{ book.title }}","{% url 'delete_book' pk=book.title %}">Delete</a>
+                            <a href="{% url 'delete_book' pk=book.title %}">Delete</a>
                         </td>
                     </tr>
                 {% endfor %}
@@ -42,12 +42,5 @@
     <!-- Add Book Form -->
     <h2><a href="{% url 'book_search' %}">Add a New Book</a></h2>
 
-    <script>
-        function confirmDelete(bookTitle, deleteUrl) {
-            var confirmMessage = `Are you sure you want to delete the book "${bookTitle}"?`;
-            if (confirm(confirmMessage)) {
-                window.location.href = deleteUrl;
-            }
-        }
-    </script>
+   
 {% endblock %}
